@@ -13,7 +13,50 @@ import requests
 import json
 
 #カメラ画像取得
+def get_camera_propaties():
+    params = ['MSEC',
+            'POS_FRAMES',
+            'POS_AVI_RATIO',
+            'FRAME_WIDTH',
+            'FRAME_HEIGHT',
+            'PROP_FPS',
+            'PROP_FOURCC',
+            'FRAME_COUNT',
+            'FORMAT',
+            'MODE',
+            'BRIGHTNESS',
+            'CONTRAST',
+            'SATURATION',
+            'HUE',
+            'GAIN',
+            'EXPOSURE',
+            'CONVERT_RGB',
+            'WHITE_BALANCE',
+            'RECTIFICATION']
+
+    cap = cv2.VideoCapture(1)
+    for num in range(19):
+        print(params[num], ':', cap.get(num))
+
 def save_frame_camera_cycle(device_num, dir_path, basename, cycle, ext='jpg', delay=1, window_name='frame'):
+    camera_num = -1
+    for camera_number in range(0, 10):
+        cap = cv2.VideoCapture(camera_number)
+        ret, frame = cap.read()
+        if ret:
+            frame_rate = cap.get(5)
+            print("Camera number:{}¥t frame rate:{}".format(camera_number, frame_rate))
+            if frame_rate < 27:
+                camera_num = camera_number
+                break
+    
+    if camera_num==-1:
+        print("Could not find camera")
+        return
+    else:
+        print("Camera found")
+    
+
     cap = cv2.VideoCapture(device_num)
 
     if not cap.isOpened():
@@ -25,6 +68,8 @@ def save_frame_camera_cycle(device_num, dir_path, basename, cycle, ext='jpg', de
     n = 0
     while True:
         ret, frame = cap.read()
+        if not ret:
+            continue
         cv2.imshow(window_name, frame)
         if cv2.waitKey(delay) & 0xFF == ord('q'):
             break
